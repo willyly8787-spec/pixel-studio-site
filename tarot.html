@@ -60,7 +60,7 @@ textarea:focus,.fu input:focus,button:focus-visible,.seg input:focus-visible+spa
 .front.rev svg{transform:rotate(180deg)}
 .cname{font-weight:600;text-align:center;min-height:1.6em;font-size:15px;line-height:1.3}
 .tag{font-size:13px;color:#d8c3b0;font-weight:400}
-.drawbar{display:flex;justify-content:center;margin-top:28px}
+.drawbar{display:flex;justify-content:center;margin:0 0 22px}
 .draw{background:var(--gold);color:#3d0c1d;animation:glow 2.4s ease-in-out infinite}
 .draw:active{transform:translateY(1px)}
 @keyframes glow{0%,100%{box-shadow:0 2px 0 var(--gold2),0 0 0 0 rgba(230,201,127,.55)}50%{box-shadow:0 2px 0 var(--gold2),0 0 0 12px rgba(230,201,127,0)}}
@@ -68,17 +68,21 @@ textarea:focus,.fu input:focus,button:focus-visible,.seg input:focus-visible+spa
 @keyframes deal{0%{transform:translateY(60px) rotate(-10deg) scale(.8);opacity:0}70%{transform:translateY(-6px) rotate(2deg) scale(1.02);opacity:1}100%{transform:none}}
 .spread.shuffle .card{animation:shake .5s ease-in-out}
 @keyframes shake{25%{transform:translateX(-8px) rotate(-3deg)}50%{transform:translateX(8px) rotate(3deg)}75%{transform:translateX(-4px) rotate(-1deg)}}
-.arena{position:relative;height:clamp(300px,50vw,500px);overflow:hidden;touch-action:pan-y;user-select:none;cursor:grab;margin:0 auto 6px;max-width:900px}
+.arena{position:relative;height:clamp(340px,54vw,560px);overflow:hidden;touch-action:pan-y;user-select:none;cursor:grab;margin:0 auto 6px;max-width:1000px}
 .arena.dragging{cursor:grabbing}
-.halo{position:absolute;left:50%;bottom:-40%;width:min(760px,96%);aspect-ratio:1;transform:translateX(-50%);border:1px solid rgba(230,201,127,.22);border-radius:50%;box-shadow:inset 0 0 50px rgba(230,201,127,.06);pointer-events:none}
-.halo::after{content:"";position:absolute;inset:20px 40px;border:1px solid rgba(230,201,127,.12);border-radius:50%}
-.fc{position:absolute;left:50%;top:0;width:clamp(48px,6.6vw,82px);aspect-ratio:7/12;margin-left:calc(clamp(48px,6.6vw,82px)/-2);padding:0;border:0;background:none;cursor:pointer;transform-origin:50% 100%;will-change:transform;transition:opacity .3s}
-.fc .lf{display:block;width:100%;height:100%;transition:transform .25s ease,filter .25s}
-.fc svg{width:100%;height:100%;display:block;border-radius:7px;box-shadow:0 6px 16px rgba(0,0,0,.45)}
-.fc:hover .lf,.fc:focus-visible .lf{transform:translateY(-18px) scale(1.08);filter:drop-shadow(0 0 12px rgba(230,201,127,.7))}
+.halo{position:absolute;left:50%;bottom:-46%;width:min(820px,98%);aspect-ratio:1;transform:translateX(-50%);border:1px solid rgba(242,207,135,.2);border-radius:50%;box-shadow:0 0 75px rgba(193,128,194,.08),inset 0 0 60px rgba(193,128,194,.08);pointer-events:none}
+.halo::before,.halo::after{content:"";position:absolute;border:1px solid rgba(242,207,135,.1);border-radius:50%;inset:22px}
+.halo::after{inset:48px}
+.star{position:absolute;color:#ffe2a3;pointer-events:none;animation:twinkle 2.6s ease-in-out infinite alternate}
+.s1{left:14%;top:14%;font-size:14px}.s2{right:15%;top:20%;font-size:10px;animation-delay:.7s}.s3{left:30%;top:44%;font-size:8px;animation-delay:1.2s}.s4{right:30%;top:8%;font-size:12px;animation-delay:1.8s}
+@keyframes twinkle{to{opacity:.25;transform:scale(.7)}}
+.fc{position:absolute;left:50%;top:0;width:clamp(62px,8.6vw,112px);aspect-ratio:7/12;margin-left:calc(clamp(62px,8.6vw,112px)/-2);padding:0;border:0;background:none;cursor:pointer;transform-origin:50% 100%;will-change:transform;transition:opacity .3s}
+.fc .lf{display:block;width:100%;height:100%;border-radius:12px;transition:transform .3s cubic-bezier(.2,.8,.2,1),filter .3s;box-shadow:0 11px 26px rgba(5,4,10,.6)}
+.fc svg{width:100%;height:100%;display:block}
+.fc:hover .lf,.fc:focus-visible .lf{transform:translateY(-26px) scale(1.1);filter:drop-shadow(0 0 18px rgba(243,204,146,.6))}
 .fc:hover,.fc:focus-visible{z-index:90!important;outline:none}
 .fc.gone{opacity:0;pointer-events:none}
-.fc.gone .lf{transform:translateY(-90px)}
+.fc.gone .lf{transform:translateY(-110px) scale(1.15)}
 .fanbar{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:0 0 22px}
 .rnd{font-size:18px;min-height:52px;padding:0 30px;border-radius:99px;letter-spacing:.06em}
 .lt{color:#f3e6d6;border-color:rgba(230,201,127,.45);background:rgba(255,255,255,.04)}
@@ -104,7 +108,7 @@ summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:
 .mean b{display:block}.mean small{color:var(--soft)}
 .note{color:var(--soft);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
 @media(max-width:600px){.pos{font-size:12px}.cname{font-size:13px}.spread{gap:10px}.bub{padding:10px 13px}}
-@media(prefers-reduced-motion:reduce){.inner{transition:none}.draw,.card.deal,.spread.shuffle .card,.msg,.dots span{animation:none}}
+@media(prefers-reduced-motion:reduce){.star{animation:none}.inner{transition:none}.draw,.card.deal,.spread.shuffle .card,.msg,.dots span{animation:none}}
 </style>
 </head>
 <body>
@@ -122,14 +126,14 @@ summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:
 </div></header>
 
 <section class="band table"><div class="wrap">
-  <p class="hint" id="hint">写好问题后，按下牌下方的「洗牌并抽牌」，再依序点开每一张牌。</p>
+  <div class="drawbar"><button class="go draw" id="go" type="submit" form="f">洗牌并抽牌</button></div>
+  <p class="hint" id="hint">写好问题后，按下上方的「洗牌并抽牌」，再依序点开每一张牌。</p>
   <p class="spname" id="spname"></p>
-  <div class="arena" id="arena" hidden aria-label="牌扇，可拖曳或滑动旋转"><div class="halo"></div><div id="fan"></div></div>
+  <div class="arena" id="arena" hidden aria-label="牌扇，可拖曳或滑动旋转"><div class="halo"></div><span class="star s1">✦</span><span class="star s2">✧</span><span class="star s3">✦</span><span class="star s4">✧</span><div id="fan"></div></div>
   <div class="fanbar" id="fanbar" hidden>
     <button class="go draw rnd" id="rnd" type="button">✦ 帮我随机选一张 ✦</button>
   </div>
   <div class="spread" id="spread"></div>
-  <div class="drawbar"><button class="go draw" id="go" type="submit" form="f">洗牌并抽牌</button></div>
 </div></section>
 
 <section class="band" id="out" hidden><div class="wrap">
@@ -196,7 +200,7 @@ function detect(q){
   return"three";
 }
 
-const back=`<svg viewBox="0 0 140 240"><rect width="140" height="240" fill="#4a0f24"/><rect x="7" y="7" width="126" height="226" rx="8" fill="none" stroke="#e6c97f" stroke-width="1.5"/><rect x="13" y="13" width="114" height="214" rx="5" fill="none" stroke="#e6c97f" stroke-opacity=".45"/><g fill="none" stroke="#e6c97f" stroke-width="1.2"><circle cx="70" cy="120" r="34"/><circle cx="70" cy="120" r="22" stroke-opacity=".6"/><path d="M70 78v84M28 120h84M41 91l58 58M99 91l-58 58" stroke-opacity=".35"/></g><path d="M70 104l4.5 11.5L86 120l-11.5 4.5L70 136l-4.5-11.5L54 120l11.5-4.5z" fill="#e6c97f"/><g fill="#e6c97f" fill-opacity=".7"><circle cx="70" cy="34" r="2"/><circle cx="70" cy="206" r="2"/><circle cx="30" cy="40" r="1.3"/><circle cx="110" cy="200" r="1.3"/><circle cx="110" cy="40" r="1.3"/><circle cx="30" cy="200" r="1.3"/></g></svg>`;
+const back=`<svg viewBox="0 0 140 240"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a2a48"/><stop offset=".5" stop-color="#3d0f22"/><stop offset="1" stop-color="#1e0710"/></linearGradient><radialGradient id="mg" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#ffe2a8" stop-opacity=".35"/><stop offset="1" stop-color="#ffe2a8" stop-opacity="0"/></radialGradient></defs><rect width="140" height="240" rx="12" fill="url(#bg)"/><rect x="5" y="5" width="130" height="230" rx="9" fill="none" stroke="#e6c97f" stroke-width="1.6"/><rect x="11" y="11" width="118" height="218" rx="6" fill="none" stroke="#e6c97f" stroke-opacity=".35"/><text x="70" y="27" text-anchor="middle" font-size="11" fill="#f8daa0">✦</text><path d="M24 214V92a46 46 0 0 1 92 0v122z" fill="url(#mg)" stroke="#e6c97f" stroke-opacity=".5"/><g fill="none" stroke="#e6c97f" stroke-opacity=".14"><ellipse cx="70" cy="112" rx="20" ry="26"/><ellipse cx="70" cy="112" rx="32" ry="42"/><ellipse cx="70" cy="112" rx="44" ry="58"/></g><circle cx="70" cy="110" r="20" fill="#e6c97f"/><circle cx="80" cy="104" r="18" fill="#3d0f22"/><text x="44" y="88" font-size="14" fill="#fff0c5">✧</text><text x="70" y="200" text-anchor="middle" font-size="8" letter-spacing="3" fill="#f1d4a0" fill-opacity=".75">MOONLIT</text></svg>`;
 const AVA=`<svg viewBox="0 0 44 44"><rect width="44" height="44" fill="#6b1730"/><circle cx="22" cy="24" r="13" fill="#f3e3cf"/><path d="M9 22c0-9 6-14 13-14s13 5 13 14c-3-4-7-6-13-6s-10 2-13 6z" fill="#3a1420"/><circle cx="17.5" cy="25" r="1.4" fill="#3a1420"/><circle cx="26.5" cy="25" r="1.4" fill="#3a1420"/><path d="M19 30q3 2 6 0" stroke="#b5485f" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M22 8c0-3 2-5 5-5-1 3-3 4-5 5zM22 8c0-2-2-4-4-4 0 2 2 4 4 4z" fill="#4fa59a"/><path d="M33 9a4 4 0 1 0 3 6 3.2 3.2 0 1 1-3-6z" fill="#e6c97f"/></svg>`;
 function front(c){
   const mid=c.major
@@ -248,7 +252,7 @@ function wrapd(i){const n=fanEls.length;let d=((i-rot)%n+n)%n;if(d>n/2)d-=n;retu
 function layout(){
   const a=$("arena");if(!fanEls.length||a.hidden)return;
   const w=a.clientWidth,h=a.clientHeight,cw=fanEls[0].offsetWidth||70,ch=cw*12/7;
-  const vis=w<600?8:12,step=80/vis,m=cw*.5+10,R=Math.max(90,Math.min(w/2-ch*.72,h-ch-m-6));
+  const vis=w<600?7:10,step=80/vis,m=cw*.5+10,R=Math.max(90,Math.min(w/2-ch*.72,h-ch-m-6));
   fanEls.forEach((el,i)=>{
     const d=wrapd(i),ang=d*step,rad=ang*Math.PI/180,ad=Math.abs(d);
     if(ad>vis+.6){el.style.opacity="0";el.style.pointerEvents="none";el.tabIndex=-1;return}
