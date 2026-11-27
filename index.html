@@ -35,5 +35,33 @@
   </main>
   <footer class="wrap"><span>© <span id="year"></span> 像素工作室 Pixel Studio</span><a href="#top">回到頁首</a></footer>
   <script>const menu=document.querySelector(".menu"),links=document.querySelector(".navlinks");menu.addEventListener("click",()=>{const open=links.classList.toggle("open");menu.setAttribute("aria-expanded",String(open))});links.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{links.classList.remove("open");menu.setAttribute("aria-expanded","false")}));document.querySelector("#year").textContent=new Date().getFullYear();</script>
+
+  <script>
+  // Loads copy from content/site.json so it can be edited in the Pages CMS form.
+  fetch('content/site.json').then(r=>r.json()).then(copy=>{
+    const set=(selector,value)=>{const el=document.querySelector(selector);if(el&&value!==undefined)el.textContent=value};
+    const setLine=(selector,index,value)=>{const el=document.querySelector(selector);if(el&&el.childNodes[index]&&value!==undefined)el.childNodes[index].textContent=value};
+    const h=copy.hero||{};
+    set('.hero .eyebrow',h.eyebrow);
+    setLine('.hero h1',0,h.line1); setLine('.hero h1',2,h.line2); set('.hero h1 span',h.highlight);
+    set('.hero .lead',h.intro);
+    document.querySelector('.hero .lead')?.style.setProperty('white-space','pre-line');
+    set('.hero .buttons .primary',h.buttonWorks); set('.hero .buttons .btn:not(.primary)',h.buttonContact);
+    (copy.stats||[]).forEach((item,i)=>{set('.stats .stat:nth-child('+(i+1)+') strong',item.title);set('.stats .stat:nth-child('+(i+1)+') span',item.caption)});
+    const a=copy.about||{};
+    set('#about .head .kicker',a.kicker); set('#about .head h2',a.title); set('#about .head p',a.summary);
+    const story=document.querySelector('#about .about .panel:first-child p');if(story&&a.story!==undefined){story.textContent=a.story;story.style.whiteSpace='pre-line'}
+    (a.tags||[]).forEach((v,i)=>set('#about .chips .chip:nth-child('+(i+1)+')',v));
+    (copy.facts||[]).forEach((item,i)=>{set('#about .facts .fact:nth-child('+(i+1)+') strong',item.title);set('#about .facts .fact:nth-child('+(i+1)+') span',item.value)});
+    const ws=copy.worksSection||{};
+    set('#works .head .kicker',ws.kicker);set('#works .head h2',ws.title);set('#works .head p',ws.summary);
+    (copy.works||[]).forEach((item,i)=>{const card=document.querySelector('#works .work-card:nth-child('+(i+1)+')');if(!card)return;const title=card.querySelector('h3 a')||card.querySelector('h3');if(title)title.textContent=item.title;set('#works .work-card:nth-child('+(i+1)+') p',item.description);set('#works .work-card:nth-child('+(i+1)+') .tags span:nth-child(1)',item.tag1);set('#works .work-card:nth-child('+(i+1)+') .tags span:nth-child(2)',item.tag2)});
+    const c=copy.contact||{};
+    set('#contact .kicker',c.kicker);setLine('#contact h2',0,c.line1);setLine('#contact h2',2,c.line2);set('#contact p',c.summary);
+    const email=document.querySelector('#contact .btn');if(email&&c.email!==undefined){email.textContent=c.email;email.href='mailto:'+c.email}
+    set('footer > a',copy.footer&&copy.footer.backToTop);
+  }).catch(()=>{});
+  </script>
+
 </body>
 </html>
