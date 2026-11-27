@@ -1,0 +1,71 @@
+media: media
+content:
+  - name: site-copy
+    label: 工作室文字
+    type: file
+    path: content/site.json
+    fields:
+      - name: hero
+        label: 首頁主視覺
+        type: object
+        fields:
+          - { name: eyebrow, label: 上方小標, type: string }
+          - { name: line1, label: 標題第一行, type: string }
+          - { name: line2, label: 標題第二行, type: string }
+          - { name: highlight, label: 標題強調字, type: string }
+          - { name: intro, label: 首頁介紹, type: text }
+          - { name: buttonWorks, label: 作品按鈕文字, type: string }
+          - { name: buttonContact, label: 聯絡按鈕文字, type: string }
+      - name: stats
+        label: 首頁資訊列
+        type: object
+        list: true
+        fields:
+          - { name: title, label: 標題, type: string }
+          - { name: caption, label: 說明, type: string }
+      - name: about
+        label: 關於我
+        type: object
+        fields:
+          - { name: kicker, label: 英文小標, type: string }
+          - { name: title, label: 區塊標題, type: string }
+          - { name: summary, label: 區塊簡介, type: text }
+          - { name: story, label: 個人介紹, type: text }
+          - { name: tags, label: 專長標籤, type: string, list: true }
+      - name: facts
+        label: 個人資料卡
+        type: object
+        list: true
+        fields:
+          - { name: title, label: 欄位名稱, type: string }
+          - { name: value, label: 欄位內容, type: string }
+      - name: worksSection
+        label: 作品區標題
+        type: object
+        fields:
+          - { name: kicker, label: 英文小標, type: string }
+          - { name: title, label: 區塊標題, type: string }
+          - { name: summary, label: 區塊簡介, type: text }
+      - name: works
+        label: 作品卡片
+        type: object
+        list: true
+        fields:
+          - { name: title, label: 作品名稱, type: string }
+          - { name: description, label: 作品介紹, type: text }
+          - { name: tag1, label: 標籤一, type: string }
+          - { name: tag2, label: 標籤二, type: string }
+      - name: contact
+        label: 聯絡區
+        type: object
+        fields:
+          - { name: kicker, label: 英文小標, type: string }
+          - { name: line1, label: 大標第一行, type: string }
+          - { name: line2, label: 大標第二行, type: string }
+          - { name: summary, label: 聯絡說明, type: text }
+          - { name: email, label: 電子郵件, type: string }
+      - name: footer
+        label: 頁尾
+        type: object
+        fields:
+          - { name: backToTop, label: 回到頁首文字, type: string }
