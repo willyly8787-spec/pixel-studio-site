@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>月下塔罗（简体离线版）</title>
+<style>
+/*
+VOICE: 温柔、带点俏皮的占卜聊天，仪式感但不浮夸
+IDEA: 烛光下的酒红绒布占卜桌，旁边坐着塔罗师星芽陪你聊
+PICTURE: 依问题铺开的牌阵，翻牌后解读以聊天泡泡逐则出现
+COLOUR and TYPE: 酒红绒布、淡金线条、青瓷绿点缀；Noto Serif TC
+LAYOUT: 提问与主题 → 牌桌与抽牌按钮 → 星芽对话与追问 → 牌义折叠
+*/
+:root{color-scheme:light dark;
+--bg:light-dark(#f6efe6,#170810);--cloth:light-dark(#6b1730,#3d0c1d);--cloth2:light-dark(#7d1f3b,#4d1226);
+--gold:#e6c97f;--gold2:#b8954a;--ink:light-dark(#2b0f18,#f3e6d6);--soft:light-dark(#6d4a52,#c9b1a6);
+--jade:#4fa59a;--panel:light-dark(#fffaf3,#24101a);--bub:light-dark(#f1e6da,#2e1622);--line:light-dark(#e3d3c2,#4a2533)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 "Noto Serif SC","Songti SC","STSong","SimSun",serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1000px;margin:0 auto}
+header.band{padding-bottom:16px}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0 0 6px;font-weight:900;text-wrap:balance}
+h2{font-size:22px;margin:0 0 14px}
+.sub{color:var(--soft);margin:0}
+form{display:grid;gap:12px;margin-top:22px}
+label.l{font-weight:600}
+textarea,.fu input{font:inherit;font-size:16px;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+textarea{min-height:84px;resize:vertical}
+textarea:focus,.fu input:focus,button:focus-visible,.seg input:focus-visible+span{outline:3px solid var(--jade);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ideas button{font:inherit;font-size:14px;min-height:36px;padding:4px 12px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--soft);cursor:pointer}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{cursor:pointer}
+.seg input{position:absolute;opacity:0}
+.seg span{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:15px}
+.seg input:checked+span{background:var(--cloth);color:var(--gold);border-color:var(--cloth)}
+.go{font:inherit;font-weight:600;font-size:17px;min-height:48px;padding:0 26px;border-radius:12px;border:0;background:var(--cloth);color:var(--gold);cursor:pointer;box-shadow:0 2px 0 var(--gold2)}
+.go:disabled{opacity:.55;cursor:default}
+.muted{color:var(--soft);font-size:14px}
+.table{background:radial-gradient(ellipse at 50% 35%,var(--cloth2),var(--cloth) 70%);color:#f3e6d6;position:relative}
+.table::before{content:"";position:absolute;inset:14px;border:1px solid rgba(230,201,127,.35);border-radius:18px;pointer-events:none}
+.hint{text-align:center;color:#d8c3b0;margin:0 0 18px;font-size:15px}
+.spname{text-align:center;color:var(--gold);font-weight:600;margin:-8px 0 16px;min-height:1.6em}
+.spread{--c:3;display:grid;grid-template-columns:repeat(var(--c),minmax(0,160px));justify-content:center;gap:clamp(12px,2.6vw,28px)}
+.spread[data-n="1"]{--c:1}.spread[data-n="5"]{--c:5}
+@media(max-width:700px){.spread[data-n="5"]{--c:3}}
+.slot{display:grid;gap:8px;justify-items:center;align-content:start}
+.pos{color:var(--gold);font-weight:600;font-size:14px;text-align:center;line-height:1.35;min-height:2.7em;display:flex;align-items:flex-end}
+.card{width:100%;max-width:160px;aspect-ratio:7/12;perspective:900px;background:none;border:0;padding:0;cursor:pointer}
+.card[disabled]{cursor:default}
+.inner{position:relative;width:100%;height:100%;transition:transform .8s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d}
+.card.up .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.face svg{width:100%;height:100%;display:block}
+.front{transform:rotateY(180deg)}
+.front.rev svg{transform:rotate(180deg)}
+.cname{font-weight:600;text-align:center;min-height:1.6em;font-size:15px;line-height:1.3}
+.tag{font-size:13px;color:#d8c3b0;font-weight:400}
+.drawbar{display:flex;justify-content:center;margin-top:28px}
+.draw{background:var(--gold);color:#3d0c1d;animation:glow 2.4s ease-in-out infinite}
+.draw:active{transform:translateY(1px)}
+@keyframes glow{0%,100%{box-shadow:0 2px 0 var(--gold2),0 0 0 0 rgba(230,201,127,.55)}50%{box-shadow:0 2px 0 var(--gold2),0 0 0 12px rgba(230,201,127,0)}}
+.card.deal{animation:deal .6s cubic-bezier(.2,.8,.3,1) both;animation-delay:var(--d,0s)}
+@keyframes deal{0%{transform:translateY(60px) rotate(-10deg) scale(.8);opacity:0}70%{transform:translateY(-6px) rotate(2deg) scale(1.02);opacity:1}100%{transform:none}}
+.spread.shuffle .card{animation:shake .5s ease-in-out}
+@keyframes shake{25%{transform:translateX(-8px) rotate(-3deg)}50%{transform:translateX(8px) rotate(3deg)}75%{transform:translateX(-4px) rotate(-1deg)}}
+.arena{position:relative;height:clamp(300px,50vw,500px);overflow:hidden;touch-action:pan-y;user-select:none;cursor:grab;margin:0 auto 6px;max-width:900px}
+.arena.dragging{cursor:grabbing}
+.halo{position:absolute;left:50%;bottom:-40%;width:min(760px,96%);aspect-ratio:1;transform:translateX(-50%);border:1px solid rgba(230,201,127,.22);border-radius:50%;box-shadow:inset 0 0 50px rgba(230,201,127,.06);pointer-events:none}
+.halo::after{content:"";position:absolute;inset:20px 40px;border:1px solid rgba(230,201,127,.12);border-radius:50%}
+.fc{position:absolute;left:50%;top:0;width:clamp(48px,6.6vw,82px);aspect-ratio:7/12;margin-left:calc(clamp(48px,6.6vw,82px)/-2);padding:0;border:0;background:none;cursor:pointer;transform-origin:50% 100%;will-change:transform;transition:opacity .3s}
+.fc .lf{display:block;width:100%;height:100%;transition:transform .25s ease,filter .25s}
+.fc svg{width:100%;height:100%;display:block;border-radius:7px;box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.fc:hover .lf,.fc:focus-visible .lf{transform:translateY(-18px) scale(1.08);filter:drop-shadow(0 0 12px rgba(230,201,127,.7))}
+.fc:hover,.fc:focus-visible{z-index:90!important;outline:none}
+.fc.gone{opacity:0;pointer-events:none}
+.fc.gone .lf{transform:translateY(-90px)}
+.fanbar{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.rnd{font-size:18px;min-height:52px;padding:0 30px;border-radius:99px;letter-spacing:.06em}
+.lt{color:#f3e6d6;border-color:rgba(230,201,127,.45);background:rgba(255,255,255,.04)}
+.ph{width:100%;max-width:160px;aspect-ratio:7/12;border:1.5px dashed rgba(230,201,127,.5);border-radius:10px;display:grid;place-items:center;color:rgba(230,201,127,.75);font-size:13px}
+.chat{display:grid;gap:12px}
+.msg{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;animation:pop .35s ease-out both}
+.msg.me{grid-template-columns:minmax(0,1fr);justify-items:end}
+.ava{width:44px;height:44px;border-radius:50%;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.bub{background:var(--bub);border-radius:4px 16px 16px 16px;padding:12px 16px;max-width:680px;white-space:pre-wrap}
+.me .bub{background:var(--cloth);color:#f8e9d4;border-radius:16px 4px 16px 16px}
+.who{font-size:13px;color:var(--soft);margin-bottom:2px}
+.dots span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--soft);animation:blink 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fu{display:flex;gap:8px;margin-top:16px}
+.fu input{flex:1;min-height:48px}
+.tools{margin-top:12px}
+.ghost{font:inherit;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+details{margin-top:28px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+.mean{border-top:1px solid var(--line);padding:10px 0}
+.mean b{display:block}.mean small{color:var(--soft)}
+.note{color:var(--soft);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+@media(max-width:600px){.pos{font-size:12px}.cname{font-size:13px}.spread{gap:10px}.bub{padding:10px 13px}}
+@media(prefers-reduced-motion:reduce){.inner{transition:none}.draw,.card.deal,.spread.shuffle .card,.msg,.dots span{animation:none}}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <h1>月下塔罗</h1>
+  <p class="sub">写下你想问的事，塔罗师星芽会依你的问题铺牌，陪你一张张看。（离线版，不用连网）</p>
+  <form id="f">
+    <label class="l" for="q">你的问题</label>
+    <textarea id="q" maxlength="200" placeholder="例如：他最近对我忽冷忽热，他在想什么？"></textarea>
+    <div class="row ideas" id="ideas"></div>
+    <span class="l">问题类型</span>
+    <div class="seg" id="topics" role="radiogroup" aria-label="问题类型"></div>
+    <div class="row"><span class="muted" id="state"></span></div>
+  </form>
+</div></header>
+
+<section class="band table"><div class="wrap">
+  <p class="hint" id="hint">写好问题后，按下牌下方的「洗牌并抽牌」，再依序点开每一张牌。</p>
+  <p class="spname" id="spname"></p>
+  <div class="arena" id="arena" hidden aria-label="牌扇，可拖曳或滑动旋转"><div class="halo"></div><div id="fan"></div></div>
+  <div class="fanbar" id="fanbar" hidden>
+    <button class="go draw rnd" id="rnd" type="button">✦ 帮我随机选一张 ✦</button>
+  </div>
+  <div class="spread" id="spread"></div>
+  <div class="drawbar"><button class="go draw" id="go" type="submit" form="f">洗牌并抽牌</button></div>
+</div></section>
+
+<section class="band" id="out" hidden><div class="wrap">
+  <h2>星芽的解读</h2>
+  <div class="chat" id="chat"></div>
+  <form class="fu" id="fu" hidden></form>
+  <div class="row tools"><button class="ghost" id="copy" type="button" hidden>复制整段解读</button></div>
+  <details><summary>查看每张牌的基本牌义</summary><div id="means"></div></details>
+</div></section>
+
+<footer class="band" style="padding-top:0"><div class="wrap">
+  <p class="note">本页为离线娱乐版，解读由牌义组合生成，并非 AI 或真人占卜。内容仅供娱乐与自我反思参考，不代表真实得知他人想法，也不构成医疗、法律、财务或其他专业建议。涉及健康、安全或重大决定时，请咨询专业人士。星芽为本站原创角色，牌面为原创简化图样。</p>
+</div></footer>
+
+<script>
+{
+const NAME="星芽";
+const MAJOR=[
+["愚者","0","新的开始、冒险、纯真","鲁莽、犹豫不前、缺乏计划"],["魔术师","I","创造力、行动、资源齐备","欺瞒、能力未发挥、分心"],
+["女祭司","II","直觉、内在智慧、静观","忽视直觉、隐瞒、表面化"],["皇后","III","丰盛、滋养、感受美好","过度依赖、停滞、忽略自己"],
+["皇帝","IV","秩序、责任、稳固","控制欲、僵化、权威冲突"],["教皇","V","传统、指引、学习","打破常规、教条、不信任"],
+["恋人","VI","选择、连结、真心","失衡、犹豫、价值冲突"],["战车","VII","意志、前进、胜利","失控、方向不明、急躁"],
+["力量","VIII","勇气、温柔的坚定、耐心","自我怀疑、情绪失控"],["隐士","IX","独处、反思、寻找答案","孤立、逃避、过度封闭"],
+["命运之轮","X","转机、循环、时机到来","阻碍、运势低迷、抗拒改变"],["正义","XI","公平、因果、清楚判断","不公、逃避责任、偏颇"],
+["倒吊人","XII","换个角度、暂停、放下","拖延、无谓牺牲、卡住"],["死神","XIII","结束与重生、转化","抗拒结束、停滞、念旧"],
+["节制","XIV","平衡、调和、循序渐进","失衡、过度、缺乏耐心"],["恶魔","XV","执着、欲望、束缚","挣脱束缚、觉察、重获自由"],
+["高塔","XVI","突变、真相浮现、破旧","避免灾难、延迟的改变"],["星星","XVII","希望、疗愈、信心","失望、缺乏信心、迷惘"],
+["月亮","XVIII","不安、潜意识、迷雾","迷雾散去、真相渐明"],["太阳","XIX","喜悦、成功、活力","短暂低潮、过度乐观"],
+["审判","XX","觉醒、召唤、重新评估","自我否定、错过机会"],["世界","XXI","完成、圆满、新阶段","未完成、差一步、收尾不全"]];
+const SUITS=[["权杖","行动与热情","✦"],["圣杯","情感与关系","❦"],["宝剑","思考与沟通","✧"],["钱币","工作与金钱","◈"]];
+const RANKS=[["一","新的开端、种子萌芽","起步受阻、机会溜走"],["二","抉择、平衡、合作","犹豫不决、失衡"],["三","成长、初步成果、团队","沟通不良、进度落后"],
+["四","稳定、休息、守成","停滞、过度保守"],["五","挑战、冲突、失落","走出低潮、和解"],["六","和谐、前进、互助","回顾过去、付出不对等"],
+["七","坚持、考验、评估","放弃、信心不足"],["八","变动、快速进展、专注","受阻、方向混乱"],["九","接近完成、韧性","焦虑、最后一里的疲惫"],
+["十","完结、责任、收获","负担过重、难以放手"],["侍者","新消息、学习、好奇","不成熟、消息延迟"],["骑士","行动、追求、冲劲","冲动、半途而废"],
+["皇后","滋养、包容、成熟","情绪化、过度付出"],["国王","掌控、经验、领导","专断、失去分寸"]];
+const DECK=MAJOR.map(m=>({name:m[0],num:m[1],up:m[2],down:m[3],major:true}));
+SUITS.forEach(s=>RANKS.forEach((r,i)=>DECK.push({name:s[0]+r[0],num:i<10?String(i+1):r[0],up:`${s[1]}方面：${r[1]}`,down:`${s[1]}方面：${r[2]}`,sym:s[2]})));
+
+const SPREADS={
+  mind:{label:"对方想法",name:"心意探索牌阵",pos:["他现在的状态","他心里在想的","没说出口的","他这样做的原因","接下来的变化","你可以怎么做"]},
+  love:{label:"感情",name:"感情关系牌阵",pos:["你的状态","对方的状态","关系现况","目前的阻碍","未来走向"]},
+  work:{label:"工作学业",name:"事业发展牌阵",pos:["目前处境","你的优势","面临的挑战","该注意的事","近期发展"]},
+  yesno:{label:"是非选择",name:"是非指引牌阵",pos:["支持的力量","阻碍的力量","整体倾向"]},
+  three:{label:"时间线",name:"过去・现在・未来",pos:["过去","现在","未来"]},
+  daily:{label:"今日指引",name:"今日一张牌",pos:["今日指引"]}};
+const IDEAS=["他最近忽冷忽热，他在想什么？","我和他有可能复合吗？","我该不该换工作？","今天要注意什么？"];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+let drawn=[],flipped=0,question="",spreadKey="three",convo=[],transcript=[],fuLeft=3,ctrl=null,busy=false,sampleFn=null;
+
+$("ideas").innerHTML=IDEAS.map(t=>`<button type="button">${esc(t)}</button>`).join("");
+$("ideas").addEventListener("click",e=>{if(e.target.tagName==="BUTTON"){$("q").value=e.target.textContent;$("q").focus()}});
+$("topics").innerHTML=`<label><input type="radio" name="tp" value="auto" checked><span>自动判断</span></label>`+
+  Object.entries(SPREADS).map(([k,s])=>`<label><input type="radio" name="tp" value="${k}"><span>${s.label}</span></label>`).join("");
+
+function detect(q){
+  if(/今天|今日/.test(q))return"daily";
+  if(/(他|她|对方|前任|暧昧对象).{0,8}(想|心意|感觉|看我|怎么看|在乎|喜欢我)/.test(q))return"mind";
+  if(/感情|喜欢|恋|复合|分手|暧昧|告白|交往|结婚|桃花|另一半|男友|女友|老公|老婆/.test(q))return"love";
+  if(/工作|上班|面试|升迁|换工作|离职|老板|同事|事业|考试|学业|创业|案子|客户/.test(q))return"work";
+  if(/该不该|会不会|能不能|要不要|是否|可不可以|有没有机会/.test(q))return"yesno";
+  return"three";
+}
+
+const back=`<svg viewBox="0 0 140 240"><rect width="140" height="240" fill="#4a0f24"/><rect x="7" y="7" width="126" height="226" rx="8" fill="none" stroke="#e6c97f" stroke-width="1.5"/><rect x="13" y="13" width="114" height="214" rx="5" fill="none" stroke="#e6c97f" stroke-opacity=".45"/><g fill="none" stroke="#e6c97f" stroke-width="1.2"><circle cx="70" cy="120" r="34"/><circle cx="70" cy="120" r="22" stroke-opacity=".6"/><path d="M70 78v84M28 120h84M41 91l58 58M99 91l-58 58" stroke-opacity=".35"/></g><path d="M70 104l4.5 11.5L86 120l-11.5 4.5L70 136l-4.5-11.5L54 120l11.5-4.5z" fill="#e6c97f"/><g fill="#e6c97f" fill-opacity=".7"><circle cx="70" cy="34" r="2"/><circle cx="70" cy="206" r="2"/><circle cx="30" cy="40" r="1.3"/><circle cx="110" cy="200" r="1.3"/><circle cx="110" cy="40" r="1.3"/><circle cx="30" cy="200" r="1.3"/></g></svg>`;
+const AVA=`<svg viewBox="0 0 44 44"><rect width="44" height="44" fill="#6b1730"/><circle cx="22" cy="24" r="13" fill="#f3e3cf"/><path d="M9 22c0-9 6-14 13-14s13 5 13 14c-3-4-7-6-13-6s-10 2-13 6z" fill="#3a1420"/><circle cx="17.5" cy="25" r="1.4" fill="#3a1420"/><circle cx="26.5" cy="25" r="1.4" fill="#3a1420"/><path d="M19 30q3 2 6 0" stroke="#b5485f" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M22 8c0-3 2-5 5-5-1 3-3 4-5 5zM22 8c0-2-2-4-4-4 0 2 2 4 4 4z" fill="#4fa59a"/><path d="M33 9a4 4 0 1 0 3 6 3.2 3.2 0 1 1-3-6z" fill="#e6c97f"/></svg>`;
+function front(c){
+  const mid=c.major
+    ?`<circle cx="70" cy="112" r="38" fill="none" stroke="#7a5a2a" stroke-width="1.4"/><path d="M70 80l6 24 24 8-24 8-6 24-6-24-24-8 24-8z" fill="#b8954a" fill-opacity=".85"/><circle cx="70" cy="112" r="6" fill="#4a0f24"/>`
+    :`<text x="70" y="132" text-anchor="middle" font-size="58" fill="#7d1f3b">${esc(c.sym)}</text>`;
+  return `<svg viewBox="0 0 140 240"><rect width="140" height="240" fill="#f7eedd"/><rect x="7" y="7" width="126" height="226" rx="8" fill="none" stroke="#b8954a" stroke-width="1.5"/><text x="70" y="38" text-anchor="middle" font-size="18" font-weight="600" fill="#4a0f24" font-family="Songti SC,STSong,SimSun,serif">${esc(c.num)}</text>${mid}<line x1="30" y1="180" x2="110" y2="180" stroke="#b8954a" stroke-opacity=".6"/><text x="70" y="206" text-anchor="middle" font-size="17" font-weight="600" fill="#4a0f24" font-family="Songti SC,STSong,SimSun,serif">${esc(c.name)}</text></svg>`;
+}
+function setSpread(n){const s=$("spread");s.dataset.n=n;s.style.setProperty("--c",n===6?3:n===5?"":n);if(n===5)s.style.removeProperty("--c")}
+function emptySpread(key){
+  const sp=SPREADS[key];setSpread(sp.pos.length);$("spname").textContent="";
+  $("spread").innerHTML=sp.pos.map(p=>`<div class="slot"><div class="pos">${esc(p)}</div><button class="card" disabled aria-label="${esc(p)}的牌"><div class="inner"><div class="face">${back}</div></div></button><div class="cname"></div></div>`).join("");
+}
+emptySpread("three");
+$("topics").addEventListener("change",e=>{if(!drawn.length){const v=e.target.value;emptySpread(v==="auto"?"three":v)}});
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+$("f").addEventListener("submit",e=>{
+  e.preventDefault();
+  question=$("q").value.trim();
+  if(!question){$("state").textContent="请先写下你的问题。";$("q").focus();return}
+  if(ctrl)ctrl.abort();busy=false;
+  const tp=document.querySelector('input[name=tp]:checked').value;
+  spreadKey=tp==="auto"?detect(question):tp;
+  drawn=[];flipped=0;convo=[];transcript=[];fuLeft=3;
+  $("state").textContent="";$("go").disabled=true;
+  $("out").hidden=true;$("means").innerHTML="";$("chat").innerHTML="";$("fu").hidden=true;$("copy").hidden=true;
+  emptySpread(spreadKey);
+  $("spread").classList.add("shuffle");
+  setTimeout(()=>{$("spread").classList.remove("shuffle");startPick()},reduce()?0:500);
+});
+
+/* 牌扇选牌 */
+let pile=[],fanEls=[],rot=0,target=0,raf=0,dragX=null,dragMoved=false;
+function startPick(){
+  const sp=SPREADS[spreadKey];
+  $("go").disabled=false;$("go").textContent="重新抽牌";
+  $("spname").textContent=sp.name;
+  $("spread").innerHTML=sp.pos.map((p,i)=>`<div class="slot"><div class="pos">${esc(p)}</div><div class="ph" id="ph${i}">第 ${i+1} 张</div><div class="cname" id="cn${i}"></div></div>`).join("");
+  pile=shuffle([...DECK]);rot=target=0;
+  $("fan").innerHTML=pile.map(()=>`<button class="fc" type="button" aria-label="选这张牌"><span class="lf">${back}</span></button>`).join("");
+  fanEls=[...$("fan").children];
+  fanEls.forEach(el=>el.addEventListener("click",()=>{if(dragMoved){dragMoved=false;return}pick(fanEls.indexOf(el))}));
+  $("arena").hidden=false;$("fanbar").hidden=false;
+  pickHint();layout();
+  $("arena").scrollIntoView({behavior:reduce()?"auto":"smooth",block:"center"});
+}
+function pickHint(){const left=SPREADS[spreadKey].pos.length-drawn.length;$("hint").textContent=`默想你的问题，从半圆牌扇中选出 ${left} 张牌。可以拖曳、滑动或用滚轮慢慢转动。`}
+function wrapd(i){const n=fanEls.length;let d=((i-rot)%n+n)%n;if(d>n/2)d-=n;return d}
+function layout(){
+  const a=$("arena");if(!fanEls.length||a.hidden)return;
+  const w=a.clientWidth,h=a.clientHeight,cw=fanEls[0].offsetWidth||70,ch=cw*12/7;
+  const vis=w<600?8:12,step=80/vis,m=cw*.5+10,R=Math.max(90,Math.min(w/2-ch*.72,h-ch-m-6));
+  fanEls.forEach((el,i)=>{
+    const d=wrapd(i),ang=d*step,rad=ang*Math.PI/180,ad=Math.abs(d);
+    if(ad>vis+.6){el.style.opacity="0";el.style.pointerEvents="none";el.tabIndex=-1;return}
+    const x=R*Math.sin(rad),y=h-m-R*Math.cos(rad)-ch;
+    el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${(ang*.55).toFixed(2)}deg)`;
+    el.style.opacity=el.classList.contains("gone")?"0":String(Math.min(1,vis+.6-ad));
+    el.style.pointerEvents=ad<=vis?"auto":"none";el.tabIndex=ad<=vis?0:-1;
+    el.style.zIndex=String(Math.round(60-ad*2));
+  });
+}
+function tick(){
+  const diff=target-rot;
+  if(Math.abs(diff)<.002||reduce()){rot=target;layout();raf=0;return}
+  rot+=diff*.09;layout();raf=requestAnimationFrame(tick);
+}
+function spin(dt){target+=dt;if(!raf)raf=requestAnimationFrame(tick)}
+function pick(idx){
+  const sp=SPREADS[spreadKey];if(idx<0||drawn.length>=sp.pos.length)return;
+  const c=pile[idx],el=fanEls[idx],i=drawn.length,r=Math.random()<.35;
+  drawn.push({...c,pos:sp.pos[i],rev:r,meaning:r?c.down:c.up});
+  el.classList.add("gone");pile.splice(idx,1);fanEls.splice(idx,1);
+  setTimeout(()=>el.remove(),350);
+  if(idx<rot){rot-=1;target-=1}
+  $("ph"+i).outerHTML=`<button class="card deal" data-i="${i}" aria-label="翻开${esc(sp.pos[i])}的牌"><div class="inner"><div class="face">${back}</div><div class="face front${r?" rev":""}">${front(drawn[i])}</div></div></button>`;
+  layout();
+  if(drawn.length<sp.pos.length){pickHint();return}
+  $("hint").textContent="牌选好了！点击牌面依序翻开，全部翻开后星芽就会开始解读。";
+  setTimeout(()=>{$("arena").hidden=true;$("fanbar").hidden=true;$("spread").scrollIntoView({behavior:reduce()?"auto":"smooth",block:"center"})},reduce()?0:450);
+}
+const arena=$("arena");
+arena.addEventListener("pointerdown",e=>{if(e.button)return;dragX=e.clientX;dragMoved=false;arena.classList.add("dragging")});
+arena.addEventListener("pointermove",e=>{if(dragX===null)return;const dx=e.clientX-dragX;if(Math.abs(dx)>4)dragMoved=true;dragX=e.clientX;spin(-dx/55)});
+const endDrag=()=>{dragX=null;arena.classList.remove("dragging")};
+arena.addEventListener("pointerup",endDrag);arena.addEventListener("pointercancel",endDrag);arena.addEventListener("pointerleave",endDrag);
+arena.addEventListener("wheel",e=>{e.preventDefault();const d=Math.abs(e.deltaY)>Math.abs(e.deltaX)?e.deltaY:e.deltaX;spin(Math.max(-1.5,Math.min(1.5,d/140)))},{passive:false});
+arena.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){spin(-1);e.preventDefault()}if(e.key==="ArrowRight"){spin(1);e.preventDefault()}});
+$("rnd").addEventListener("click",()=>{
+  if(!fanEls.length||drawn.length>=SPREADS[spreadKey].pos.length)return;
+  const k=Math.floor(Math.random()*fanEls.length),n=fanEls.length;
+  let d=((k-target)%n+n)%n;if(d>n/2)d-=n;spin(d);
+  $("rnd").disabled=true;
+  setTimeout(()=>{$("rnd").disabled=false;pick(k)},reduce()?0:700);
+});
+addEventListener("resize",()=>layout());
+
+$("spread").addEventListener("click",e=>{
+  const b=e.target.closest(".card[data-i]");if(!b||b.classList.contains("up"))return;
+  const d=drawn[+b.dataset.i];b.classList.add("up");b.disabled=true;
+  $("cn"+b.dataset.i).innerHTML=`${esc(d.name)}<div class="tag">${d.rev?"逆位":"正位"}</div>`;
+  flipped++;
+  $("means").insertAdjacentHTML("beforeend",`<div class="mean"><small>${esc(d.pos)}</small><b>${esc(d.name)}（${d.rev?"逆位":"正位"}）</b>${esc(d.meaning)}</div>`);
+  if(flipped===drawn.length){
+    $("hint").textContent="牌已全部翻开。";$("out").hidden=false;
+    addMe(question);
+    setTimeout(reading,reduce()?0:500);
+  }
+});
+
+
+function addMe(t){const m=document.createElement("div");m.className="msg me";const b=document.createElement("div");b.className="bub";b.textContent=t;m.appendChild(b);$("chat").appendChild(m)}
+function botBubble(t){
+  const m=document.createElement("div");m.className="msg";
+  m.innerHTML=`<div class="ava">${AVA}</div><div><div class="who">${NAME}</div><div class="bub"></div></div>`;
+  const b=m.querySelector(".bub");if(t==null){b.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> <span class="muted">${NAME}正在解读牌面…</span>`}else b.textContent=t;
+  return m;
+}
+function segs(t){return t.split(/\n?\s*={3,}\s*\n?/).map(s=>s.replace(/=+\s*$/,"").replace(/\*\*/g,"").replace(/^#+\s*/gm,"").trim()).filter(Boolean)}
+function makeLive(){const live=document.createElement("div");live.className="chat";$("chat").appendChild(live);live.appendChild(botBubble(null));return live}
+function renderLive(live,t,done){
+  const parts=segs(t);live.textContent="";
+  parts.forEach((p,i)=>{const b=botBubble(p);b.style.animationDelay=(i*0.12)+"s";live.appendChild(b)});
+  if(!done)live.appendChild(botBubble(null));
+}
+function offline(){
+  const live=makeLive();
+  const t=["目前没办法连上 AI，先帮你整理每张牌的意思喔。",...drawn.map(d=>`${d.pos}是${d.name}（${d.rev?"逆位":"正位"}）：${d.meaning}`)].join("\n===\n");
+  renderLive(live,t,true);transcript.push(...segs(t));$("copy").hidden=false;
+}
+
+const POSLINE={
+"他现在的状态":"放在这里，说的是他眼下的处境。","他心里在想的":"这张牌反映他内心比较在意的念头。","没说出口的":"这是他藏在心里、还没表现出来的部分。",
+"他这样做的原因":"这说明了他现在会这样表现的理由。","接下来的变化":"接下来一段时间，事情可能往这个方向走。","你可以怎么做":"这是牌给你的行动方向。",
+"你的状态":"这张牌照出你自己目前的心境。","对方的状态":"这是对方此刻的状态。","关系现况":"这说的是你们之间现在的样子。","目前的阻碍":"这是目前卡住你们的地方。","未来走向":"顺着现在的状态走下去，可能是这样的发展。",
+"目前处境":"这是你现在所在的位置。","你的优势":"这是你手上可以好好运用的力量。","面临的挑战":"这是需要你花心思面对的课题。","该注意的事":"这里提醒你别忽略这一点。","近期发展":"近期事情可能这样展开。",
+"支持的力量":"这是站在你这一边的力量。","阻碍的力量":"这是让事情变慢的因素。","整体倾向":"综合来看，整体的倾向是这样。",
+"过去":"这是影响现在的过去。","现在":"这是你此刻的状态。","未来":"顺着现况，未来可能这样发展。","今日指引":"这就是今天想送给你的提醒。"};
+const OPEN=["好，我们一起来看看牌怎么说吧 🌙","心里挂着这件事一定不轻松吧，来，我们慢慢看牌 ✨","谢谢你愿意把问题交给牌，我们一张张来看喔 🌱"];
+const kw=d=>d.meaning.replace(/^.*?方面：/,"").split("、")[0];
+function localReading(){
+  const n=drawn.length,ups=drawn.filter(d=>!d.rev).length,majors=drawn.filter(d=>d.major).length,last=drawn[n-1];
+  let concl=ups/n>=.7?"整体是偏正向的信号，事情有往好的方向走的空间。":ups/n<=.3?"目前阻力比较多，事情需要时间，也需要你先照顾好自己。":"好坏参半，有顺的地方也有卡住的地方，关键在你接下来怎么选。";
+  if(majors*2>=n&&n>1)concl+="这次大牌出现得多，代表这件事对你的影响比较深。";
+  const out=[OPEN[Math.floor(Math.random()*OPEN.length)],"先说结论："+concl];
+  drawn.forEach(d=>out.push(`${d.pos}是${d.name}（${d.rev?"逆位":"正位"}）：${d.rev?"这张牌的能量有点卡住，":"这张牌的能量比较顺，"}重点在「${d.meaning.replace(/^.*?方面：/,"")}」。${POSLINE[d.pos]||"把它当作这个位置的提示就好。"}`));
+  out.push(`${NAME}的小提示～接下来的这几天到两周内，试着留意和「${kw(last)}」有关的小事。${last.rev?"先别急着下结论，给自己一点缓冲。":"感觉对了，就勇敢踏出一小步吧。"} ✨`);
+  return out.join("\n===\n");
+}
+function reading(){const live=makeLive();setTimeout(()=>{const t=localReading();renderLive(live,t,true);transcript.push(...segs(t));$("copy").hidden=false},reduce()?0:1400)}
+$("copy").addEventListener("click",async()=>{
+  const head=`问题：${question}\n牌阵：${SPREADS[spreadKey].name}\n`+drawn.map(d=>`${d.pos}：${d.name}（${d.rev?"逆位":"正位"}）`).join("\n");
+  try{await navigator.clipboard.writeText(head+"\n\n"+transcript.join("\n\n"));$("copy").textContent="已复制"}catch{$("copy").textContent="无法复制"}
+  setTimeout(()=>$("copy").textContent="复制整段解读",1500);
+});
+}
+</script>
+</body>
+</html>
